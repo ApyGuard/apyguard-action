@@ -62,6 +62,7 @@ This action only calls HTTP APIs. It doesn't require elevated GitHub token permi
 | api_key | Yes | Your ApyGuard API token |
 | task_id | Yes | The task ID from ApyGuard platform |
 | api_url | No | Custom API endpoint URL (defaults to production) |
+| severity_threshold | No | Custom severity threshold (default value "Medium") |
 
 ## Outputs
 
