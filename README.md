@@ -135,9 +135,13 @@ The whole workflow is in [examples/apyguard.yml](examples/apyguard.yml).
 
 ## License
 
-This project is licensed under the **MIT License**.
+The action's own code is licensed under the **Apache License 2.0** ([LICENSE](LICENSE)).
 
-Copyright (c) 2025 **ApyGuard**.
+The APIScout Engine wheel in `vendor/` is proprietary to Atlada Cyber Security and is not covered by that license: it may be used only as part of this action, and may not be used on its own or redistributed. See [NOTICE](NOTICE).
+
+PyYAML, also in `vendor/`, is distributed unmodified under its own MIT license, which is inside its wheel.
+
+Copyright 2025-2026 **Atlada Cyber Security**.
 
 ---
 
