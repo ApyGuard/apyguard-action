@@ -1,0 +1,19 @@
+ApyGuard GitHub Action
+Copyright 2025-2026 Atlada Cyber Security
+
+The action's own source code, tests, examples, and documentation are licensed
+under the Apache License, Version 2.0, in the LICENSE file.
+
+The Apache License does not cover the APIScout Engine wheel,
+vendor/apyguard_engine-*.whl. The engine is proprietary to Atlada Cyber
+Security. It is licensed only under the license file inside the wheel, and may
+be used only as part of this action. It may not be copied beyond what running
+the action requires, used on its own, or redistributed.
+
+The action also ships PyYAML, vendor/pyyaml-*.whl, unmodified. PyYAML is
+Copyright (c) 2017-2021 Ingy döt Net and Copyright (c) 2006-2016 Kirill
+Simonov, and is licensed under the MIT License included in that wheel.
+
+The ApyGuard and APIScout names belong to Atlada Cyber Security. As section 6
+of the Apache License states, the license grants no permission to use them,
+except to describe where the action comes from.

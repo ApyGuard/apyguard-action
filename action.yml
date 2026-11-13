@@ -1,21 +1,66 @@
 name: 'ApyGuard API Security Scanner'
-description: 'Scan APIs for security issues using ApyGuard'
+description: 'Report the API changes a pull request makes, or run an ApyGuard scan task, in your CI/CD pipeline'
 inputs:
+  mode:
+    description: 'pr reports the endpoints a pull request adds or changes and the APIScout findings on them; scan runs an ApyGuard CI/CD scan task'
+    required: false
+    default: 'scan'
   api_key:
-    description: 'ApyGuard API token'
-    required: true
+    description: 'ApyGuard API token (scan mode)'
+    required: false
   task_id:
-    description: 'Task ID from ApyGuard platform'
-    required: true
+    description: 'Task ID from ApyGuard platform (scan mode)'
+    required: false
   api_url:
     description: 'ApyGuard API endpoint URL'
-    required: true
-    default: 'https://api.apyguard.com/v1'
+    required: false
+    default: 'https://api.apyguard.com'
   severity_threshold:
-    description: 'Severity threshold for the scan. Options are Critical, High, Medium, Low, Informational'
-    required: true
+    description: 'Fail at this severity or above. Options are Critical, High, Medium, Low, Informational'
+    required: false
     default: 'Medium'
-  
+  project_path:
+    description: 'Folder of the API project, relative to the repository root (pr mode)'
+    required: false
+    default: '.'
+  github_token:
+    description: 'Token that comments on the pull request (pr mode)'
+    required: false
+    default: ${{ github.token }}
+  timeout_minutes:
+    description: 'How long scan mode waits for the scan to finish'
+    required: false
+    default: '120'
+outputs:
+  changed_endpoint_count:
+    description: 'pr mode: endpoints the pull request adds or changes'
+    value: ${{ steps.run.outputs.changed_endpoint_count }}
+  finding_count:
+    description: 'pr mode: APIScout findings on those endpoints'
+    value: ${{ steps.run.outputs.finding_count }}
+  results:
+    description: 'scan mode: vulnerability counts by severity, as JSON'
+    value: ${{ steps.run.outputs.results }}
 runs:
-  using: 'node16'
-  main: 'dist/index.js'
+  using: composite
+  steps:
+    - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+      with:
+        python-version: '3.13'
+    - if: inputs.mode == 'pr'
+      shell: bash
+      # The engine and its dependency come from vendor/ only, so the step needs no package index.
+      run: python -P -m pip install --disable-pip-version-check --quiet --no-index --find-links "$GITHUB_ACTION_PATH/vendor" "$GITHUB_ACTION_PATH/vendor/apyguard_engine-1.0.15-cp313-cp313-manylinux_2_28_x86_64.whl"
+    - id: run
+      shell: bash
+      run: python -P -m apyguard_action
+      env:
+        PYTHONPATH: ${{ github.action_path }}
+        INPUT_MODE: ${{ inputs.mode }}
+        INPUT_API_KEY: ${{ inputs.api_key }}
+        INPUT_TASK_ID: ${{ inputs.task_id }}
+        INPUT_API_URL: ${{ inputs.api_url }}
+        INPUT_SEVERITY_THRESHOLD: ${{ inputs.severity_threshold }}
+        INPUT_PROJECT_PATH: ${{ inputs.project_path }}
+        INPUT_GITHUB_TOKEN: ${{ inputs.github_token }}
+        INPUT_TIMEOUT_MINUTES: ${{ inputs.timeout_minutes }}

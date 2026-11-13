@@ -1,0 +1,40 @@
+name: ApyGuard
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  # Reports the endpoints each pull request adds or changes. Nothing is sent to ApyGuard.
+  api-changes:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ApyGuard/apyguard-action@v2
+        with:
+          mode: pr
+          project_path: .
+          severity_threshold: High
+
+  # Your own deployment of the API to the environment ApyGuard scans.
+  deploy:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Deploy the API to staging here"
+
+  scan:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ApyGuard/apyguard-action@v2
+        with:
+          mode: scan
+          api_key: ${{ secrets.APYGUARD_API_KEY }}
+          task_id: YOUR_TASK_ID
+          severity_threshold: Medium
