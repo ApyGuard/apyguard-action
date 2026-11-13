@@ -6,6 +6,10 @@ import urllib.error
 import urllib.request
 from typing import Any, Mapping
 
+# Cloudflare in front of api.apyguard.com refuses urllib's default "Python-urllib/3.x" with 403
+# "error code: 1010", so every request names the action. GitHub's API also asks for a real one.
+USER_AGENT = "apyguard-action/2 (+https://github.com/ApyGuard/apyguard-action)"
+
 
 class HttpError(RuntimeError):
     """A request that failed: its status (0 when there was no reply) and the start of the body."""
@@ -24,6 +28,7 @@ def request_json(
 ) -> Any:
     data = None if body is None else json.dumps(body).encode("utf-8")
     request = urllib.request.Request(url, data=data, method=method)
+    request.add_header("User-Agent", USER_AGENT)
     for name, value in headers.items():
         request.add_header(name, value)
     if data is not None:
