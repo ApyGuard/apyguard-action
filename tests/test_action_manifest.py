@@ -37,6 +37,12 @@ class ActionManifestTest(unittest.TestCase):
         self.assertIn("python -P -m apyguard_action", self.text)
         self.assertNotRegex(self.text, r"python -m ")
 
+    def test_the_python_step_writes_its_log_as_it_goes(self) -> None:
+        # A runner's stdout is a pipe, so Python buffers it: "ApyGuard scan ... started." of a scan
+        # that ran for two hours showed up only when the job ended.
+        run_step = self.text.split("- id: run", 1)[1]
+        self.assertIn("PYTHONUNBUFFERED: '1'", run_step)
+
     def test_vendored_engine_wheel_is_the_one_the_action_installs(self) -> None:
         wheels = [path.name for path in (ROOT / "vendor").glob("apyguard_engine-*.whl")]
 

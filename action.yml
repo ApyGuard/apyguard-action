@@ -56,6 +56,8 @@ runs:
       run: python -P -m apyguard_action
       env:
         PYTHONPATH: ${{ github.action_path }}
+        # The log as it happens: a runner's stdout is a pipe, which Python would buffer until exit.
+        PYTHONUNBUFFERED: '1'
         INPUT_MODE: ${{ inputs.mode }}
         INPUT_API_KEY: ${{ inputs.api_key }}
         INPUT_TASK_ID: ${{ inputs.task_id }}
