@@ -12,6 +12,12 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
         length = int(self.headers.get("Content-Length", "0"))
         received = json.loads(self.rfile.read(length) or b"null")
+        if self.path == "/agent":
+            payload = json.dumps({"user_agent": self.headers.get("User-Agent")}).encode()
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(payload)
+            return
         if self.path == "/broken":
             self.send_response(500)
             self.end_headers()
@@ -41,6 +47,13 @@ class RequestJsonTest(unittest.TestCase):
         reply = request_json("POST", f"{self.base}/ok", {"X-Token": "secret"}, {"a": 1})
 
         self.assertEqual(reply, {"echo": {"a": 1}, "token": "secret"})
+
+    def test_names_the_action_as_the_user_agent(self) -> None:
+        # Cloudflare in front of api.apyguard.com answers urllib's default "Python-urllib/3.x"
+        # with 403 "error code: 1010", so every request has to name the action instead.
+        reply = request_json("POST", f"{self.base}/agent", {}, {})
+
+        self.assertTrue(reply["user_agent"].startswith("apyguard-action/"), reply["user_agent"])
 
     def test_error_status_names_the_status_and_body_but_not_the_token(self) -> None:
         with self.assertRaises(HttpError) as raised:
